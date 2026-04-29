@@ -52,3 +52,20 @@ launchctl unload ...; launchctl load ...
 4. `EnvironmentVariables.HOME` —— 同上，sed 时记得这个不带尾斜杠
 
 或者考虑：plist 不进 git，部署时用 envsubst 之类生成。
+
+## 同种坑的其他实例（不止 plist）
+
+跨用户名同步带过来的所有"配置 = 字符串路径"都中招：
+
+| 文件 | 问题 | 修法 |
+|------|------|------|
+| `~/Library/LaunchAgents/com.*.plist` | 4 处硬编码 | sed 改 + reload |
+| `~/.docker/config.json` 里的 context | `desktop-linux` endpoint 写死 `unix:///Users/xiaosong/.docker/run/docker.sock` | `docker context use default`（用 `/var/run/docker.sock` 系统级 symlink） |
+| `~/.zshrc` alias | `mai-claude` / `mai-codex` alias 路径硬编码 `/Users/xiaosong/Documents/mai_agent` | 改成 `$HOME/Documents/mai_agent`（zsh alias 求值时展开） |
+| `~/Library/Hive/team-kb` symlink | target 写绝对路径 `/Users/xiaosong/...` | `ln -sfn ~/SongClub/... ~/Library/Hive/team-kb` |
+
+**通用诊断手法**：副机搬过来后第一时间 `grep -rn '/Users/<主机用户名>/' ~/Library ~/.zshrc ~/.docker ~/.ssh 2>/dev/null` 把所有硬编码先列出来，比一边跑一边踩快得多。
+
+**根因总结**：macOS 跨用户名搬运不是 supported flow。两种破法：
+- A) shell-evaluated 配置（zshrc alias / wrapper script）→ 用 `$HOME` 写
+- B) 系统读取的 plain 字符串配置（plist / docker context json / symlink target）→ 必须 sed 重写绝对路径
