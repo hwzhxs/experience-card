@@ -43,6 +43,7 @@ created: 2026-04-09
 - [[cards/technical/macos-tcc-desktop-provenance]] — macOS TCC + com.apple.provenance 会在 long session 锁住 Desktop/Documents 文件（EPERM）；根治搬到 `~/` 非预定义目录，应急 `xattr -rc`
 - [[cards/technical/esp32-arduino-core-3x-ledc-tone]] — ESP32 Arduino core 3.x 下 `ledcWriteTone` 不发声，必须追加 `ledcWrite(pin, 128)` 设非 0 duty；M5.Beep 0.1.1 踩此坑
 - [[cards/technical/cross-username-launchd-paths]] — 跨机同步 plist 用户名硬编码会跨机挂；wrapper 用 `$HOME` 才幂等，plist 4 处需 sed（HOME env var 不带尾斜杠是常错点）
+- [[cards/technical/claude-code-native-binary-install]] — `claude` 跑不起来三层叠：`.exe` stub 缺 +x → platform native package 是 optionalDependency 被 npm 跳过 → Claude Code 把 grep 劫持成调 claude 的 shell function，错误传染让诊断走死胡同。`type grep` 第一时间识别劫持
 
 ## Methodology
 - [[cards/methodology/lean-agent-startup]] — Startup files should be lean pointers, load details on demand
